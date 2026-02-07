@@ -1,16 +1,27 @@
 //Core modules
 const path = require("path");
 
+const fs = require("fs");
+const uploadsDir = path.join(__dirname, "uploads");
+
+// Create uploads folder if it doesn't exist
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+
+
 //External modules
 const express = require("express");
 const session = require("express-session");
 const mongodbStore = require("connect-mongodb-session")(session); //This is used to store the session in MongoDB
+
 require("dotenv").config();
 
 const mongodbUri = process.env.MONGO_URI;
 
 // const mongodbUri =
-//   "mongodb+srv://mb2060127:mb2060127@airbnb.cv1uuxx.mongodb.net/airbnb?appName=Airbnb";
+  // "mongodb+srv://mb2060127:mb2060127@airbnb.cv1uuxx.mongodb.net/airbnb?appName=Airbnb";
 const { default: mongoose } = require("mongoose");
 const multer = require("multer");
 
@@ -104,15 +115,17 @@ app.use(errorsController.pageNotFound);
 
 const PORT = process.env.PORT || 5000;
 
-mongoose
-  .connect(mongodbUri)
-  .then(() => {
+(async () => {
+  try {
+    await mongoose.connect(mongodbUri);
     console.log("Connected to MongoDB");
+
     app.listen(PORT, () => {
-      console.log(`Server running on address http://localhost:${PORT}`);
-      // console.log(req.isLoggedIn);
+      console.log(`Server running at http://localhost:${PORT}`);
     });
-  })
-  .catch((err) => {
-    console.error("Error connecting to MongoDB", err);
-  });
+  } catch (err) {
+    console.error("MongoDB connection error:", err);
+    process.exit(1); // Stop the server if DB connection fails
+  }
+})();
+

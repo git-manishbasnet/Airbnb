@@ -48,27 +48,41 @@ exports.getHostHomes = (req, res, next) => {
   });
 };
 
-exports.postAddHome = (req, res, next) => {
-  const { houseName, price, location, rating, description } =
-    req.body;
-    if(!req.file){
-   return res.status(400).send("No file uploaded. Please upload a photo.");
+exports.postAddHome = async (req, res, next) => {
+  try {
+    const { houseName, price, location, rating, description } = req.body;
+
+    // Check if file was uploaded
+    if (!req.file) {
+      return res.status(400).send("No file uploaded. Please upload a photo.");
     }
-    const photo = req.file.path; // Get the file path from the uploaded file
-  
-  const home = new Home({
-    houseName,
-    price,
-    location,
-    rating,
-    photo,
-    description,
-  });
-  home.save().then(() => {
-    console.log("Home saved successfully", home);
-  });
-  res.redirect("/host/host-homelist");
+
+    // Use relative path for uploaded file
+    const photo = req.file.path;
+
+    // Create new Home document
+    const home = new Home({
+      houseName,
+      price,
+      location,
+      rating,
+      photo,
+      description,
+    });
+
+    // Save to MongoDB
+    await home.save();
+    console.log("Home saved successfully:", home);
+
+    // Redirect after successful save
+    res.redirect("/host/host-homelist");
+  } catch (err) {
+    console.error("Error adding home:", err);
+    // Send 500 response instead of crashing server
+    res.status(500).send("Internal Server Error");
+  }
 };
+
 
 exports.postEditHome = (req, res, next) => {
   const { id, houseName, price, location, rating, description } =
