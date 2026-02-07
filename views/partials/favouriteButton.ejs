@@ -1,0 +1,18 @@
+<!-- <form action="/favourites" method="POST">
+          <button type="submit"
+          class="mt-6 w-max bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-xl transition-all duration-300">
+          Add to Favourites
+        </button>
+        <input type="hidden" name="id" value="<%= home._id %>">
+      </form> -->
+   <form action="/favourites" method="POST">
+  <button type="submit"
+    class="mt-6 w-max bg-gradient-to-r from-green-500 to-blue-400 hover:from-green-600 hover:to-blue-500 text-white font-bold py-2 px-8 rounded-2xl shadow-lg transition-all duration-300 flex items-center gap-2"
+  >
+    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+    </svg>
+    Add to Favourites
+  </button>
+  <input type="hidden" name="id" value="<%= home._id %>">
+</form>
