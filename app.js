@@ -1,16 +1,6 @@
 //Core modules
 const path = require("path");
 
-const fs = require("fs");
-const uploadsDir = path.join(__dirname, "uploads");
-
-// Create uploads folder if it doesn't exist
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
-
-
 //External modules
 const express = require("express");
 const session = require("express-session");
@@ -42,22 +32,7 @@ const store = new mongodbStore({
   collection: "sessions", //Name of the collection where sessions will be stored
 });
 
-const randomString = () => {
-  const characters = "abcdefghijklmnopqrstuvwxyz";
-  let result = "";
-  for (let i = 0; i < 16; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return result;
-};
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/"); //This is the directory where the uploaded files will be stored
-  },
-  filename: (req, file, cb) => {
-    cb(null, randomString(10) + "-" + file.originalname); //This is the name of the uploaded file. It will be a combination of the current timestamp and the original file name
-  },
-});
+const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
   // This function is used to filter the files that are allowed to be uploaded
@@ -73,16 +48,16 @@ const fileFilter = (req, file, cb) => {
 }
 
 const multerOptions = {
-  storage:storage, //This is the storage engine that multer will use to store the uploaded files
+  storage: storage, // Store the uploaded file in memory so it can be saved in MongoDB.
   fileFilter: fileFilter, //This is the function that will be used to filter the files that are allowed to be uploaded
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+  },
 };
 
 app.use(express.urlencoded({extended: false}));
 app.use(multer(multerOptions).single("photo")); //This is used to parse the form data and make it available in req.body. multer is used to handle file uploads, and "photo" is the name of the file input field in the form.
 app.use(express.static(path.join(rootDir, "public"))); //It allows us to access the home.css file which.Otherwise we cannot set the css link to our html page
-app.use("/host/uploads",express.static(path.join(rootDir, "uploads")));
-app.use("/uploads",express.static(path.join(rootDir, "uploads")));
-app.use("/homes/uploads",express.static(path.join(rootDir, "uploads")));
 app.use(
   session({
     secret: "Airbnb secret session", //This is used to sign the session ID cookie

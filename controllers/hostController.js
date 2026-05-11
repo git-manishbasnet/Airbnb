@@ -1,6 +1,9 @@
 const Home = require("../models/home");
 const user = require("../models/user");
-const fs = require("fs");
+
+const getPhotoDataUrl = (file) => {
+  return `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
+};
 
 exports.getAddHome = (req, res, next) => {
   res.render("host/edit-home", {
@@ -57,8 +60,7 @@ exports.postAddHome = async (req, res, next) => {
       return res.status(400).send("No file uploaded. Please upload a photo.");
     }
 
-    // Use relative path for uploaded file
-    const photo = req.file.path;
+    const photo = getPhotoDataUrl(req.file);
 
     // Create new Home document
     const home = new Home({
@@ -96,12 +98,7 @@ exports.postEditHome = (req, res, next) => {
     home.rating = rating;
     home.description = description;
     if(req.file){
-      fs.unlink(home.photo, (err) => {
-        if (err) {
-          console.error("Error deleting old photo:", err);
-        } 
-      });
-      home.photo = req.file.path; // Update the photo if a new one is uploaded
+      home.photo = getPhotoDataUrl(req.file); // Update the photo if a new one is uploaded
     }
 
      home.save().then((result) => {
